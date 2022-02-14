@@ -1,0 +1,555 @@
+---
+title: "Google Capstone: Cyclistic Bike-Share Case Study"
+author: "Marcella Harris"
+date: "October 21, 2021"
+output:
+  prettydoc::html_pretty:
+    theme: architect
+    highlight: github
+---
+
+```{r project, include=FALSE}
+rm(list = ls())
+library(ProjectTemplate)
+load.project()
+```
+<br/>
+
+![Photo by <a href="">Unknown Source</a> - <a href="https://unsplash.com/s/photos/us-map?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Cyclistic logo</a>](src/cyclistic-logo.png)
+
+<br/>
+<br/>
+
+# Overview
+This is my case study for the Google Data Analytics Certificate. The purpose of this study is to get insight into Cyclist’s users historical trip data and provide compelling recommendations and professional data visualizations to their executive team.
+
+<br/>
+
+### Project Details
+In this case study, I will be analyzing third-party public data sets from the city of Chicago's Divvy system and their collaborator's database, Motivate International Inc., found here [link](https://divvy-tripdata.s3.amazonaws.com/index.html). Cyclistic, is a bike-share company based in Chicago, that features more than 5,824 bicycles and 692 docking stations. As well as, reclining bikes, hand tricycles, and cargo bikes, making bike-share more inclusive to people with disabilities and riders who can’t use a standard two-wheeled bike. Through my analysis I will uncover the trends needed to aid in the marketing team's business decision-making strategies. 
+
+##### For this case study, I will follow Google's data analysis process roadmap to ensure its completion.
+
+1. Ask Phase
+2. Prepare Phase
+3. Process Phase
+4. Analyze Phase
+5. Share Phase
+6. Act Phase
+
+<br/>
+<br/>
+
+# Roadmap
+
+
+### 1. Phase: Ask
+I am trying to solve converting Cyclistic’s casual riders into annual subscription members without creating and running a new marketing campaign targeting prospective customers. My analysis will help explain their users' preferences, habits, and goals to further the marketing team’s strategy aimed at converting casual riders into annual members.
+
+
+The stakeholders will be the following:
+
+- Lily Moreno - Director of Marketing
+- The Marketing analytics team
+- The Executive Team
+
+###
+
+***
+
+S.M.A.R.T Questions
+
+1. How do annual members and casual riders use Cyclistic bikes differently?
+2. Why would casual riders buy Cyclistic annual memberships?
+3. How can Cyclistic use digital media to influence casual riders to become subscription based?
+
+***
+
+###
+
+**Key Tasks**
+
+[X] Identify the business task.
+
+[X] Consider key stakeholders.
+
+**Deliverable**
+
+[X] A clear statement of the business task
+
+<br/>
+
+### 2. Phase: Prepare
+Cyclistic’s historical trip data was downloaded from Divvy Bikes and the original versions are stored on my flash drive. Copies are stored on my hard drive in a subfolder. The data is organized by columns in a wide format. Column names are lowercase and the naming convention is separated with underscores. Currently, there are no issues with bias or credibility with this data. It is licensed and made available by Motivate International Inc. This data is reliable, original, comprehensive, current, and cited.
+
+It does not include pass purchases to credit card numbers nor is there sensitive information that can identify their customers. The data’s integrity is valid. It offers the trip history of their rider types which has been last updated between 2020 and 2021.
+
+This data gives me insight into the types of bikes used, the frequency when used, and the duration of each trip, just to name a few. I can view the information recorded to solve the problem and confidently recommend suggestions that support the project’s objectives. There are some formatting issues and inconsistencies that I see at first glance and there is no documentation or metadata to use for reference.
+
+###
+
+***
+
+<details><summary>installed and loaded packages</summary>
+```{r Packages, eval=FALSE}
+library(tidyverse)
+library(lubridate)
+library(skimr)
+library(janitor)
+library(plyr)
+library(scales)
+library(dplyr)
+```
+</details>
+
+###
+
+<details><summary>set my working directory</summary>
+```{r Working Directory, eval=FALSE}
+# getwd()
+# setwd("C:/Users/marcl/Documents/R/Git_HUB/casestudy_repos/Google Capstone/marcella-s_portfolio/marcellaharris.github.io/Google Capstone Project")
+```
+</details>
+
+###
+
+<details><summary>imported six months  worth of data</summary>
+```{r Importing}
+# April 2021 dataset.
+# tripApr_2021 <- read_csv("~/R/Git_HUB/casestudy_repos/Google Capstone/marcella-s_portfolio/marcellaharris.github.io/Google Capstone Project/2021Apr-divvy-tripdata.csv",
+#                          col_types = cols(started_time = col_time(format = "%H:%M:%S"),
+#                                           ended_time = col_time(format = "%H:%M:%S"),
+#                                           ride_length = col_time(format = "%H:%M:%S")))
+# # May 2021 dataset.
+# tripMay_2021 <- read_csv("~/R/Git_HUB/casestudy_repos/Google Capstone/marcella-s_portfolio/marcellaharris.github.io/Google Capstone Project/2021May-divvy-tripdata.csv",
+#                          col_types = cols(started_time = col_time(format = "%H:%M:%S"),
+#                                           ended_time = col_time(format = "%H:%M:%S"),
+#                                           ride_length = col_time(format = "%H:%M:%S")))
+# # June 2021 dataset.
+# tripJun_2021 <- read_csv("~/R/Git_HUB/casestudy_repos/Google Capstone/marcella-s_portfolio/marcellaharris.github.io/Google Capstone Project/2021Jun-divvy-tripdata.csv",
+#                          col_types = cols(started_time = col_time(format = "%H:%M:%S"),
+#                                           ended_time = col_time(format = "%H:%M:%S"),
+#                                           ride_length = col_time(format = "%H:%M:%S")))
+# # July 2021 dataset.
+# tripJul_2021 <- read_csv("~/R/Git_HUB/casestudy_repos/Google Capstone/marcella-s_portfolio/marcellaharris.github.io/Google Capstone Project/2021Jul-divvy-tripdata.csv",
+#                          col_types = cols(started_time = col_time(format = "%H:%M:%S"),
+#                                           ended_time = col_time(format = "%H:%M:%S"),
+#                                           ride_length = col_time(format = "%H:%M:%S")))
+# # August 2021 dataset.
+# tripAug_2021 <- read_csv("~/R/Git_HUB/casestudy_repos/Google Capstone/marcella-s_portfolio/marcellaharris.github.io/Google Capstone Project/2021Aug-divvy-tripdata.csv",
+#                          col_types = cols(started_time = col_time(format = "%H:%M:%S"),
+#                                           ended_time = col_time(format = "%H:%M:%S"),
+#                                           ride_length = col_time(format = "%H:%M:%S")))
+# # September 2021 dataset.
+# tripSep_2021 <- read_csv("~/R/Git_HUB/casestudy_repos/Google Capstone/marcella-s_portfolio/marcellaharris.github.io/Google Capstone Project/2021Sep-divvy-tripdata.csv",
+#                          col_types = cols(started_time = col_time(format = "%H:%M:%S"),
+#                                           ended_time = col_time(format = "%H:%M:%S"),
+#                                           ride_length = col_time(format = "%H:%M:%S")))
+```
+</details>
+
+***
+
+###
+
+**Key Tasks**
+
+[X] Download data and store it appropriately.
+
+[X] Identify how it’s organized.
+
+[X] Sort and filter the data.
+
+[X] Determine the credibility of the data.
+
+**Deliverable**
+
+[X] A description of all data sources used.
+
+<br/>
+
+### 3. Phase: Process
+I used Excel to format and add columns because I’m more familiar with this program. RStudio was used for cleaning,  basic calculations, documenting and reporting, and Tableau was used for visualizations. I’ve ensured the integrity of my data by viewing all CSV files to see if they had the right type of data.
+
+In RStudio, I trimmed, renamed and reassigned columns, filtered and sorted, and converted and removed bad data. I viewed data frames in R to check variables and values. I renamed all data frames and merged them into one. The documentation and cleaning process will be included in the R markdown report.
+
+###
+
+***
+
+##### WRANGLE DATA & COMBINE
+
+<details><summary>inspect</summary>
+```{r Compare Columns}
+# Compare column names.
+compare_df_cols(X2021Apr.divvy.tripdata, X2021May.divvy.tripdata, X2021Jun.divvy.tripdata, X2021Jul.divvy.tripdata, X2021Aug.divvy.tripdata, X2021Sep.divvy.tripdata, return = "mismatch")
+
+# Inspect incongurencies.
+str(X2021Apr.divvy.tripdata)
+str(X2021May.divvy.tripdata)
+str(X2021Jun.divvy.tripdata)
+str(X2021Jul.divvy.tripdata)
+str(X2021Aug.divvy.tripdata)
+str(X2021Sep.divvy.tripdata)
+```
+</details>
+
+###
+
+<details><summary>convert and stack</summary>
+```{r Convert and Stack}
+# Convert start/end_station_id.
+tripApr_2021 <-  mutate(X2021Apr.divvy.tripdata, start_station_id = as.character(start_station_id), end_station_id = as.character(end_station_id))
+tripMay_2021 <-  mutate(X2021May.divvy.tripdata, start_station_id = as.character(start_station_id), end_station_id = as.character(end_station_id))
+tripJun_2021 <-  mutate(X2021Jun.divvy.tripdata, start_station_id = as.character(start_station_id), end_station_id = as.character(end_station_id))
+tripJul_2021 <-  mutate(X2021Jul.divvy.tripdata, start_station_id = as.character(start_station_id), end_station_id = as.character(end_station_id))
+tripAug_2021 <-  mutate(X2021Aug.divvy.tripdata, start_station_id = as.character(start_station_id), end_station_id = as.character(end_station_id))
+tripSep_2021 <-  mutate(X2021Sep.divvy.tripdata, start_station_id = as.character(start_station_id), end_station_id = as.character(end_station_id))
+
+# Stack as one dataframe.
+tripData <- rbind(tripApr_2021,tripMay_2021,tripJun_2021,tripJul_2021,tripAug_2021,tripSep_2021)
+```
+</details>
+
+###
+
+<details><summary>remove columns</summary>
+```{r Remove Latitude and Longitude}
+# Remove start_lat, start_lng, end_lat, and end_lng for 'tripData' dataframe.
+tripData <- tripData %>%
+  select(-c(start_lat, start_lng, end_lat, end_lng))
+```
+</details>
+
+###
+
+<details><summary>summaries</summary>
+```{r Summaries}
+# List column names.
+colnames(tripData)
+
+# List amount of rows in the dataframe.
+nrow(tripData)
+
+# Dimensions of the dataframe.
+dim(tripData)
+
+# List the first 6 rows.
+head(tripData)
+
+# List tails.
+tail(tripData)
+
+# List columns and data types.
+str(tripData)
+```
+</details>
+
+###
+
+<details><summary>statistical summary</summary>
+```{r Statistical Summary}
+summary(tripData)
+```
+</details>
+
+###
+
+<details><summary>observations and corrections</summary>
+```{r Observations and Corrections}
+# List observations that fall under each rider type.
+table(tripData$member_casual)
+
+# Drop empty values.
+tripData <- janitor::remove_empty(tripData, which = c("rows","cols"), quiet = FALSE)
+dim(tripData)
+
+# Reassign member_casual values.
+tripData <-  tripData %>%
+  mutate(member_casual = recode(member_casual,"Subscriber" = "member","Customer" = "casual"))
+
+# Check that observations were reassigned.
+table(tripData$member_casual)
+```
+</details>
+
+###
+
+<details><summary>time</summary>
+```{r String Values}
+# Convert string to date
+lubridate::hms(tripData$ride_length)
+lubridate::hms(tripData$ended_time)
+lubridate::hms(tripData$started_time)
+
+## Check one string from 'ride_length', 'ended_at', 'started_at'.
+tripData$ride_length[1]
+tripData$ended_time[1]
+tripData$started_time[1]
+
+# Add calculation in seconds to 'ride_length' column.
+# tripData$ride_length <- difftime(tripData$ended_time, tripData$started_time, tz,
+#                                  units = c("secs"))
+# tripData$ride_length[1]
+```
+</details>
+
+###
+
+<details><summary>inspect the columns structure</summary>
+```{r Columns}
+# Inspect the columns structure.
+str(tripData)
+```
+</details>
+
+###
+
+<details><summary>cleaned data</summary>
+```{r Clean}
+# Bye-bye bad data....removing entried bikes removed from docks and had negative quality assurance.
+tripDatacleaned_v2 <- tripData[!(tripData$start_station_name == "HQ QR" | tripData$ride_length<0),]
+
+# View the cleaned data.
+View(tripDatacleaned_v2)
+```
+</details>
+
+###
+
+<details><summary>write the CSV file</summary>
+```{r Write, eval=FALSE}
+write.csv(tripDatacleaned_v2, file = "C:/Users/marcl/Documents/R/Git_HUB/casestudy_repos/Google Capstone/marcella-s_portfolio/marcellaharris.github.io/Google Capstone Project/cyclistic_6m_Data.csv", row.names = FALSE)
+```
+</details>
+
+***
+
+###
+
+**Key Tasks**
+
+[X] Check the data for errors.
+
+[X] Choose your tools.
+
+[X] Transform the data so you can work with it effectively.
+
+[X] Document the cleaning process.
+
+**Deliverable**
+
+[X] Documentation of any cleaning or manipulation of data.
+
+<br/>
+
+### 4. Phase: Analyze
+I organized my data to have the same amount of columns and matching variable names. Then saved them all as a single CSV file. Despite, all the issues I had, I do believe my data has been properly formatted. I was surprised to see that casual riders had more ride lengths for each day. As well as, having the most docked bikes. Some trends I saw were...
+
+(1) There are more members than casual riders.
+(2) Members have fewer ride times than casual riders.
+
+These and further insights helped to tell a story of Cyclistic’s two rider types and revealed an underline reason to why their casual riders are not annual subscribers.
+
+###
+
+***
+
+<details><summary>count</summary>
+```{r Started X Count}
+# Count 'rideable_type' for the amount of user types per type of bike.
+table(tripDatacleaned_v2$rideable_type)
+
+# Count 'started_at' for the amount of transactions for user pick-ups.
+table(tripDatacleaned_v2$started_at)
+
+# Count 'ended_at' for the amount of transactions for user drop-offs.
+table(tripDatacleaned_v2$ended_at)
+```
+</details>
+
+###
+
+<details><summary>calculating</summary>
+```{r Average}
+# Calculate the straight average.
+rideLength_avg <- mean(tripDatacleaned_v2$ride_length)
+rideLength_avg
+
+# Calculate the midpoint number in the ascending array of ride lengths.
+rideLength_med <- median(tripDatacleaned_v2$ride_length)
+rideLength_med
+
+# Calculate the longest ride lengths.
+rideLength_max <- max(tripDatacleaned_v2$ride_length)
+rideLength_max
+
+# Calculate the shortest ride lengths.
+rideLength_min <- min(tripDatacleaned_v2$ride_length)
+rideLength_min
+
+# Calculate mean, median, max, and min with summary.
+rideLength_summ <- summary(tripDatacleaned_v2$ride_length)
+rideLength_summ
+```
+</details>
+
+###
+
+<details><summary>comparing</summary>
+```{r Compare Mean}
+# Compare the mean of members and casual users' ride lengths.
+aggregate(tripDatacleaned_v2$ride_length ~ tripDatacleaned_v2$member_casual, FUN = mean)
+
+# Compare the median of members and casual users' ride lengths.
+aggregate(tripDatacleaned_v2$ride_length ~ tripDatacleaned_v2$member_casual, FUN = median)
+
+# Compare the max of members and casual users' ride lengths.
+aggregate(tripDatacleaned_v2$ride_length ~ tripDatacleaned_v2$member_casual, FUN = max)
+
+# Compare the min of members and casual users' ride lengths.
+aggregate(tripDatacleaned_v2$ride_length ~ tripDatacleaned_v2$member_casual, FUN = min)
+
+# Calculate the average ride time by each day for members vs casual riders
+aggregate(tripDatacleaned_v2$ride_length ~ tripDatacleaned_v2$member_casual + tripDatacleaned_v2$day_of_week, FUN = mean)
+
+# Order the days in 'day_of_week' column.
+tripDatacleaned_v2$day_of_week <- ordered(tripDatacleaned_v2$day_of_week, levels=c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"))
+```
+</details>
+
+###
+
+<details><summary>summary analysis</summary>
+```{r Final Summary}
+skim(tripDatacleaned_v2)
+```
+</details>
+
+***
+
+###
+
+**Key Tasks**
+
+[X] Aggregate your data so it’s useful and accessible.
+
+[X] Organize and format your data.
+
+[X] Perform calculations.
+
+[X] Identify trends and relationships.
+
+
+**Deliverable**
+
+[X] A summary of your analysis.
+
+<br/>
+
+### 5. Phase: Share
+I was able to answer how casual riders use Cyclistic’s bikes differently from annual members. Given that casual riders select Cyclistic’s traditional bikes most and use them predominantly on the weekend and members for the weekdays. I can surmise that the difference between the two members is their purpose. Casual members use strictly for leisure and annual subscribers use their program strictly for work or errands.
+
+My findings kept pointing back to the difference between casual riders and members. It shows the relation between user types and rideable types, user types and frequented docking stations, and user types and daily/hourly activity. My audience is the marketing director, marketing analytics team, and the executive team. Data visualization will help me share my findings. Furthermore, I will make a PowerPoint presentation to share my analysis and express my recommendations.
+
+
+###
+
+***
+
+<details><summary>viz-1</summary>
+```{r Viz1}
+# Connecting data with ggplot
+ggplot(data = tripDatacleaned_v2)
+
+# Casual Rider & Subscription Member Totals
+ggplot(tripDatacleaned_v2, aes(member_casual, fill=member_casual)) + 
+  geom_bar() + 
+  labs(x="Rider Types", title="Casual Rider & Subscription Member Totals")
+```
+</details>
+
+<details><summary>viz-2</summary>
+```{r Viz2}
+# Rider Type Totals by Bike
+ggplot(tripDatacleaned_v2, aes(rideable_type, fill=member_casual)) + 
+  geom_bar() + 
+  labs(x="Type of Bike", title="Rider Type Totals by Bike") + 
+  coord_flip()
+```
+</details>
+
+<details><summary>viz-3</summary>
+```{r Viz3}
+# Casual & Subscription Rider Length Times
+ggplot(tripDatacleaned_v2, aes(x=member_casual, y=ride_length, fill=member_casual)) + 
+  labs(x="Rider Type", y="Riding Length Time", title="Casual & Subscription Rider Length Times") + 
+  geom_boxplot()
+```
+</details>
+
+***
+
+###
+
+**Key Tasks**
+
+[X] Determine the best way to share your findings.
+
+[X] Create effective data visualizations.
+
+[X] Present your findings.
+
+[X] Ensure your work is accessible.
+
+
+**Deliverable**
+
+[X] Supporting visualizations and key findings.
+
+<br/>
+
+### 6. Phase: Act
+My final conclusion is that casual riders are using classic bikes more and only on the weekends. While members are using the classic bikes steadily throughout the week. Both user types select classic bikes more than electric bikes but because casual riders use them on the weekends more their docking amounts are greater than members.
+
+The executive team can apply my insights by conducting a focus group of causal riders that has been with the company for a while or that use their bikes frequently. They can also have a rewards program based on referrals. The next steps should be to gather additional data and conduct further analysis. 
+
+The analytics team can generate a survey on why users go to specific docking stations. This can give insight into why the Streeter Drive & Grand Avenue station is so busy for both pick-ups and drop-offs. Additional data can also include:
+
+- Purchase method (i.e., Credit card/cash)
+- Family/Household sizes
+
+###
+
+***
+
+Marketing Analysis Presentation [link](https://github.com/MarcellaHarr/google-cyclistic_casestudy/blob/ea58bef8f23e6635968d3a98a1292a8750c7d33c/CyclisticCaseStudy/docs/Cyclistic%20Case%20Study%20Marketing%20Analysis%20Presentation.pdf)
+
+<br/>
+
+Portfolio
+[link](https://marcellaharr.github.io/portfolio/)
+
+***
+
+###
+
+**Key Tasks**
+
+[X] Create your portfolio.
+
+[X] Add your case study.
+
+[X] Practice presenting your case study to a friend or family member.
+
+**Deliverable**
+
+[X] Your top high-level insights based on your analysis.
+
+[X] Based on what you discover, a list of additional deliverables you think would be helpful to include for further exploration.
+ 
+<br/>
+
+# Thank you!
+
+Thank you for taking the time to read my analysis and please don't forget to view the PowerPoint presentation linked above.

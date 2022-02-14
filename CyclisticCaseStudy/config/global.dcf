@@ -8,7 +8,7 @@ munging: TRUE
 logging: FALSE
 logging_level: INFO
 load_libraries: TRUE
-libraries: tidyverse, dplyr, plyr, knitr, stringr, lubridate, janitor, kableExtra, RColorBrewer, paletteer, ggthemes, ggThemeAssist, ggplot2, sessioninfo
+libraries: tidyverse, dplyr, plyr, knitr, skimr, lubridate, janitor, scales, ggplot2
 as_factors: FALSE
 tables_type: tibble
 attach_internal_libraries: FALSE
